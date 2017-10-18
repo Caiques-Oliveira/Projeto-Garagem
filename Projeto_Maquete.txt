@@ -1,0 +1,62 @@
+
+Projeto Automação residencial(Garagem) via Cloud/MQTT
+
+Objetivo
+
+	Criar uma mini maquete com uma lâmpada e um portão usando no mínimo os componentes abaixo:
+		_Conter um Servo Motor que irá representar o “Portão de garagem”
+		_Conter uma lâmpada que irá representar a “Luz” da garagem, por exemplo um LED, ou Lâmpada regular controlada via Relay.
+	Fazer o controle tanto da lâmpada, quanto do portão de maneira manual e remota (MQTT).
+	Implementar soluções para dar um feedback para o usuário evidenciando se algum serviço está inativo ou não está funcionando
+	
+Requisitos
+
+	1- Feedback de estado de comunicação para o usuário:
+	sistema binário de LEDS 
+	estadoConexao = [ledVerde, ledVermelho]
+
+		1a) serviço desconectado do MQTT:( ledVerde = LOW, ledVermelho = HIGH)
+		1b) serviço conectado ao MQTT:(ledVerde = HIGH, ledVermelho = LOW)
+		1c) serviço se conectando ao MQTT :alternar entre ( ledVerde = LOW, ledVermelho = HIGH) e (ledVerde = HIGH, ledVermelho = LOW), com Delay = 500;
+		1d) enviando uma mensagem para o MQTT :ledVermelho = LOW, alternar entre ledVerde=HIGH e ledVerde=LOW, com Delay = 500;
+	
+	2- Estados de "portao":
+	estadoPortao = aberto ou estadoPortao = fechado;
+	posicao angular do servo posicao = servoPosicao, entre 0º e 90º
+	atraso em ms = Delay
+
+	3- Detecção do estado do "portão":
+	
+		3a) se servoPosicao < 30º e Delay > 1000 então estadoPortao = fechado;
+		3b) se servoPosicao > 60º e Delay > 1000 estadoPortao = aberto;
+		
+		
+	4- Alteração do estado do "portão":
+	Comandos abrePortao() e fechaPortao() devem atuar no servo motor. Estes comandos se originam de atuaçao local (toque no botao) ou atuacao remota (mensagem MQTT);
+		4a) se comando fechaPortao() enquanto estadoPortao = aberto entao atuar servo para 0º. Comando só se encerra quando estadoPortao == fechado ;
+		4b) se comando abrePortao() enquanto estadoPortao = fechado entao atuar servo para 90º. Comando só se encerra quando estadoBotao == aberto;
+		4c) se estadoPortao = aberto e estadoBotao = HIGH executar comando fechaPortao();
+		4d) se estadoPortao = fechado e estadoBotao = HIGH executar comando abrePortao();
+		4e) se estadoPortao = fechado e chegar mensagem 'abre' no topico 'portao' executar comando abrePortao(). Verificar presença de mensagem a cada 5 segundos;
+		4e) se estadoPortao = aberto e chegar mensagem 'fecha' no topico 'portao' executar comando fechaPortao(). Verificar presença de mensagem a cada 5 segundos;
+			
+
+	5- Reporte do estado do portão:
+	estados possíveis: portaoAberto, portaoFechado
+		5a) quando estadoPortao == fechado enviar para o servidor mensagem 'fechado' no topico 'portao'.
+		5b) quando estadoPortao == aberto enviar para o servidor mensagem 'aberto' no topico 'portao'.
+
+	6- Estados de "luz":
+	estadoLuz = HIGH ou estado Luz = LOW;	
+
+	7- Alteracao de estado da "luz":
+		7a) Quando estadoPortao == aberto fazer estadoLuz = HIGH;
+		7b) Quando estadoPortao ==  fechado fazer estadoLuz = LOW;
+	
+	8- Reporte de estado da 'luz':
+		5a) quando estadoLuz == LOW enviar para o servidor mensagem 'apagado' no topico 'luz'.
+		5b) quando estadoLuz == HIGH enviar para o servidor mensagem 'aceso' no topico 'luz'.
+
+
+	
+		
