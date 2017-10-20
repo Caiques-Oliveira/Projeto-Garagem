@@ -14,7 +14,7 @@
 
 Servo portao;
 int pos = 0;
-const int Botao = 2;
+const int Botao = 4;
 int estadoBotao = LOW;
 int lampada = 8;
 int estadoPortao = LOW; // LOW indica portao fechado, HIGH indica portao aberto
